@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main() {
+int userNumber, randomNumber, attempts = 0;
+srand(time(0));
+printf("Enter a number between 0 and 99: ");
+scanf("%d", &userNumber);
+if (userNumber < 0 || userNumber > 99) {
+printf("Please enter a valid number between 0 and 99.\n");
+return 1;
+}
+do {
+randomNumber = rand() % 100;
+attempts++;
+} while (randomNumber != userNumber);
+printf("It took %d random numbers generated to match the number %d entered by you.\n", attempts, userNumber);
+
+return 0;
+}
