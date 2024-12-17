@@ -1,0 +1,239 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define ROWS 10
+#define COLUS 10
+
+// Global variables
+char maze[ROWS][COLUS];
+int player_row, player_col, remained_steps, game_over, GoodJob;
+
+// Function prototypes
+void initialize_maze();
+void create_path_to_exit();
+void display_maze();
+void inputs(char player_move);
+void check_player();
+int solve_puzzle();
+void end_game();
+
+int main() {
+    // Initialization of the maze and game variables
+    initialize_maze();
+    display_maze();
+
+    // Set the initial values
+    player_row = 0;
+    player_col = 0;
+    remained_steps = 30;
+    game_over = 0;
+    GoodJob = 0;
+
+    char player_move;
+
+    // The main loop of the game
+    while (!game_over)
+    {
+        display_maze();
+        printf("Steps remaining: %d | Keys collected: %d\n", remained_steps, GoodJob);
+        printf("Enter your move (L/R/U/D): ");
+        scanf(" %c", &player_move);
+
+        inputs(player_move);
+        check_player();
+
+        // Check if ther's no more steps
+        if (remained_steps <= 0)
+        {
+            printf("\nYou are out of steps! Solve a puzzle to earn 5 more steps.\n");
+            if (solve_puzzle())
+            {
+                printf("Correct! You earned 5 extra steps.\n");
+                remained_steps = 5; // Give player 5 more steps
+            }
+            else
+            {
+                printf("Wrong answer! Game over.\n");
+                game_over = 1; // End the game if puzzle is failed
+            }
+        }
+    }
+
+    end_game(game_over);
+    return 0;
+}
+
+
+// Initialize maze with walls and keys
+void initialize_maze()
+{
+
+    // Set all cells to paths ('0')
+    for (int i = 0; i < ROWS; i++)
+        {
+        for (int j = 0; j < COLUS; j++)
+        {
+            maze[i][j] = '0';
+        }
+    }
+
+    // Set the start and exit points
+    maze[0][0] = 'S';
+    maze[ROWS - 1][COLUS - 1] = 'X';
+
+    // Randomly place walls (#) everywhere except the start and exit
+    for (int i = 0; i < ROWS; i++)
+        {
+        for (int j = 0; j < COLUS; j++)
+         {
+            if ((i == 0 && j == 0) || (i == ROWS - 1 && j == COLUS - 1))
+            {
+                continue; // Skip start and exit positions
+            }
+
+            int rand_val = rand() % 10; // Random value
+            if (rand_val < 5)
+                {
+                maze[i][j] = '#'; // 30% chance of being a wall
+            }
+        }
+    }
+
+    // Guarantee a valid path from start to exit
+    create_path_to_exit();
+}
+
+void create_path_to_exit()
+{
+    int i = 0, j = 0;
+
+    while (i < ROWS - 1 || j < COLUS - 1)
+        {
+        maze[i][j] = '0'; // Clear the path
+        if (i < ROWS - 1 && (rand() % 2 || j == COLUS - 1))
+         {
+            i++; // Move down
+        } else if (j < COLUS - 1)
+         {
+            j++; // Move right
+        }
+    }
+
+    // Ensure the exit is reachable
+    maze[ROWS - 1][COLUS - 1] = 'X';
+
+    // Place 3 keys near the path
+    for (int k = 0; k < 9; k++)
+        {
+        int key_row = (rand() % 4 == 0) ? rand() % ROWS : i; // On or near path
+        int key_colu = (rand() % 4 == 0) ? rand() % COLUS : j;
+        if (maze[key_row][key_colu] == '0')
+        {
+            maze[key_row][key_colu] = 'K'; // Place the key
+        } else
+        {
+            k--; // Retry if the spot is invalid
+        }
+    }
+}
+
+
+// Display maze in a console with improved visuals
+void display_maze()
+{
+    system("cls"); // Clear console
+
+    printf("\n   ");
+    for (int i = 0; i < COLUS; i++) printf(" %2d ", i); // Column indices
+    printf("\n");
+
+    for (int i = 0; i < ROWS; i++)
+    {
+        printf(" %2d ", i); // Row indices
+        for (int j = 0; j < COLUS; j++)
+        {
+            if (i == player_row && j == player_col)
+                printf(" [P] "); // Player position
+            else if (maze[i][j] == '#')
+                printf(" [#] "); // Wall
+            else if (maze[i][j] == 'K')
+                printf(" [K] "); // Key
+            else if (maze[i][j] == 'S')
+                printf(" [S] "); // Start
+            else if (maze[i][j] == 'X')
+                printf(" [X] "); // Exit
+            else
+                printf(" [ ] "); // Empty path
+        }
+        printf("\n");
+    }
+}
+
+// Handle player inputs
+void inputs(char player_move)
+{
+    int new_row = player_row, new_col = player_col;
+
+    if (player_move == 'L' || player_move == 'l') new_col--;
+    else if (player_move == 'R' || player_move == 'r') new_col++;
+    else if (player_move == 'U' || player_move == 'u') new_row--;
+    else if (player_move == 'D' || player_move == 'd') new_row++;
+    else
+    {
+        printf("Invalid move. Use L, R, U, or D.\n");
+        return;
+    }
+
+    if (new_row >= 0 && new_row < ROWS && new_col >= 0 && new_col < COLUS && maze[new_row][new_col] != '#')
+    {
+        player_row = new_row;
+        player_col = new_col;
+        remained_steps--;
+    }
+    else
+    {
+        printf("You hit a wall or went out of bounds! Try again.\n");
+    }
+}
+
+// Check player position
+void check_player()
+{
+    char cell = maze[player_row][player_col];
+
+    if (cell == 'X')
+    {
+        if (GoodJob >= 3)
+        {
+            printf("Congratulations! You found the exit with enough keys!\n");
+            game_over = 1;
+        }
+        else printf("You need at least 3 keys to exit! Keep searching.\n");
+    }
+    else if (cell == 'K')
+    {
+        printf("You found a key! Solve a puzzle to keep it!\n");
+        if (solve_puzzle()) { GoodJob++; printf("Key secured!\n"); }
+        else { printf("Wrong answer! Lost 2 steps.\n"); remained_steps -= 2; }
+        maze[player_row][player_col] = '0';
+    }
+}
+
+// Solve puzzle to secure key
+int solve_puzzle()
+{
+    int player_answer, a = rand() % 10 + 1, b = rand() % 5 + 1;
+    int correct_answer = a * b;
+    printf("Solve this: %d * x = %d. Find x: ", a, correct_answer);
+    scanf("%d", &player_answer);
+    return player_answer == b;
+}
+
+// End the game
+void end_game()
+{
+    if (player_row == ROWS - 1 && player_col == COLUS - 1)
+        printf("You escaped successfully! Keys collected: %d\n", GoodJob);
+    else printf("Game over. Better luck next time!\n");
+}
