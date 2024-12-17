@@ -1,0 +1,18 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int counter ();
+int main ()
+{
+counter();
+counter();
+counter();
+
+}
+int counter()
+{
+static int x = 0;
+printf("value of x as it enters the function : %d\n",x);
+x++;
+printf("increment value of x : %d\n",x);
+}
