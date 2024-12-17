@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int age = 0;
+int futureAge (void)
+{
+int newAge = age +5 ;
+return newAge ;
+}
+int main()
+{
+char name[10] ;
+int Age ;
+
+printf("Enter your name :");
+scanf("%s",name);
+printf("Enter your age :");
+scanf("%d",& age);
+printf("hello %s, your age after 5 year will be: %d years old.\n", name,futureAge ());
+}
