@@ -1,0 +1,37 @@
+#include <stdio.h>
+
+void findMinCoins(int coins[], int n, int amount)
+{
+int i, count = 0;
+
+printf("Coins used:\n");
+for (i = 0; i < n; i++)
+    {
+    while (amount >= coins[i])
+    {
+        amount -= coins[i];
+        count++;
+        printf("%d ", coins[i]);
+    }
+}
+
+if (amount == 0)
+    printf("\nMinimum coins required: %d\n", count);
+else
+    printf("\nChange cannot be made exactly with the given denominations.\n");
+}
+
+int main()
+{
+
+int coins[] = {25, 10, 5, 1};
+int n = sizeof(coins) / sizeof(coins[0]);
+int amount;
+
+printf("Enter the amount to change: ");
+scanf("%d", &amount);
+
+findMinCoins(coins, n, amount);
+
+return 0;
+}
